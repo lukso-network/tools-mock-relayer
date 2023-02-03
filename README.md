@@ -1,6 +1,6 @@
 # Dummy Transaction Relayer
 
-Skeleton example Transaction Relayer Service according to LSP15-TransactionRelayServiceAPI API specification.
+Skeleton example Transaction Relayer Service according to [LSP15-TransactionRelayServiceAPI](https://github.com/lukso-network/LIPs/blob/main/LSPs/LSP-15-TransactionRelayServiceAPI.md) API specification.
 
 ## API
 
