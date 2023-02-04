@@ -4,9 +4,9 @@ import { ExecutePayload } from "./relayer.interfaces";
 import { handleExecute } from "./relayer.service";
 import { logger } from "../../libs/logger.service";
 
-const router = express.Router();
+const relayerController = express.Router();
 
-router.post("/execute", async (req: Request, res: Response) => {
+relayerController.post("/execute", async (req: Request, res: Response) => {
   const { address, transaction } = req.body as ExecutePayload;
 
   try {
@@ -18,4 +18,4 @@ router.post("/execute", async (req: Request, res: Response) => {
   }
 });
 
-export default router;
+export default relayerController;

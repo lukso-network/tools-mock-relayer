@@ -1,6 +1,6 @@
 import { createServer } from "./config/express";
 import { logger } from "./libs/logger.service";
-import router from "./modules/relayer/relayer.controller";
+import relayerController from "./modules/relayer/relayer.controller";
 import http from "http";
 import { AddressInfo } from "net";
 
@@ -10,7 +10,7 @@ const port = process.env.PORT || "3000";
 async function startServer() {
   const app = createServer();
 
-  app.use("/", router);
+  app.use("/", relayerController);
 
   const server = http.createServer(app).listen({ host, port }, () => {
     const addressInfo = server.address() as AddressInfo;
