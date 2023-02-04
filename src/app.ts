@@ -1,5 +1,6 @@
 import { createServer } from "./config/express";
 import { logger } from "./libs/logger.service";
+import quotaController from "./modules/quota/quota.controller";
 import relayerController from "./modules/relayer/relayer.controller";
 import http from "http";
 import { AddressInfo } from "net";
@@ -11,6 +12,7 @@ async function startServer() {
   const app = createServer();
 
   app.use("/", relayerController);
+  app.use("/quota", quotaController);
 
   const server = http.createServer(app).listen({ host, port }, () => {
     const addressInfo = server.address() as AddressInfo;

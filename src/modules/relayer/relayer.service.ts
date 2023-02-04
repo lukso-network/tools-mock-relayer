@@ -5,8 +5,8 @@ import {
   LSP6KeyManager__factory,
   UniversalProfile__factory,
 } from "../../../types/ethers-v5";
-import { logger } from "../../libs/logger.service";
 import { getProvider } from "../../libs/ethers.service";
+import { logger } from "../../libs/logger.service";
 import { signTransaction } from "../../libs/signer.service";
 
 export async function handleExecute(address: string, transaction: Transaction) {
