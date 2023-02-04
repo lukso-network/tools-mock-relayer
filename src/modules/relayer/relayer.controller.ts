@@ -14,7 +14,13 @@ relayerController.post("/execute", async (req: Request, res: Response) => {
     res.send({ transactionHash });
   } catch (error: any) {
     logger.error(error.message);
-    res.status(500).send(new Error("Internal Server Error"));
+
+    if (error.message.includes("Transaction in progress")) {
+      res.status(429).send(error.message);
+      return;
+    }
+
+    if (error.message) res.status(500).send("Internal Server Error");
   }
 });
 

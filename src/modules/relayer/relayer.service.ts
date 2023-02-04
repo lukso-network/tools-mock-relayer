@@ -6,11 +6,17 @@ import {
   UniversalProfile__factory,
 } from "../../../types/ethers-v5";
 import { getProvider } from "../../libs/ethers.service";
+import {
+  transactionGate,
+  waitForTransaction,
+} from "../../libs/listener.service";
 import { logger } from "../../libs/logger.service";
 import { signTransaction } from "../../libs/signer.service";
 
 export async function handleExecute(address: string, transaction: Transaction) {
   logger.info("Received execute request");
+
+  transactionGate();
 
   const provider = getProvider();
 
@@ -39,10 +45,14 @@ export async function handleExecute(address: string, transaction: Transaction) {
     gasLimit: gasLimit.toNumber(),
   });
 
-  provider.sendTransaction(signature.signedTransaction);
+  const transactionResponse = await provider.sendTransaction(
+    signature.signedTransaction
+  );
+
+  waitForTransaction(transactionResponse);
 
   const transactionHash = ethers.utils.keccak256(signature.signedTransaction);
-  logger.info(`Dispatched transaction: ${transactionHash}`);
+  logger.info(`✉️ Dispatched transaction: ${transactionHash}`);
 
   return transactionHash;
 }
