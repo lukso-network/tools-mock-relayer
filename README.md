@@ -22,7 +22,7 @@ This project does not handle concurrent transactions. To prevent nonce reuse err
 
 This can be turned on or off by setting `ENABLE_TRANSACTION_GATE` to `true` or `false` in the .env config.
 
-## API
+## LSP15 Transaction Relayer Service API Specification
 
 #### POST `/execute`
 
