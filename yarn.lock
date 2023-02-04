@@ -122,6 +122,16 @@
     enabled "2.0.x"
     kuler "^2.0.0"
 
+"@erc725/erc725.js@^0.16.0":
+  version "0.16.0"
+  resolved "https://registry.yarnpkg.com/@erc725/erc725.js/-/erc725.js-0.16.0.tgz#df392c29d4fc3eb9043d92a9eac31801b7547c0a"
+  integrity sha512-3PdCCyq3CbLTxCVIWrcSLOWLS7gcE9O1wfmpw9wZU+0uvbI92ILxT/BJMGsFs0JUVNvwjUzU9/v/EERTjKjGag==
+  dependencies:
+    ethereumjs-util "^7.1.4"
+    web3-eth-abi "^1.7.3"
+    web3-providers-http "^1.8.0"
+    web3-utils "^1.7.3"
+
 "@erc725/smart-contracts@^4.1.1":
   version "4.1.1"
   resolved "https://registry.yarnpkg.com/@erc725/smart-contracts/-/smart-contracts-4.1.1.tgz#4cc26f3569dea8ba987f9514c1ed29f34cab3743"
@@ -819,6 +829,16 @@
   dependencies:
     "@jridgewell/resolve-uri" "^3.0.3"
     "@jridgewell/sourcemap-codec" "^1.4.10"
+
+"@lukso/eip191-signer.js@^0.2.2":
+  version "0.2.2"
+  resolved "https://registry.yarnpkg.com/@lukso/eip191-signer.js/-/eip191-signer.js-0.2.2.tgz#bcc01961fe0ad34228b4a4a320d93bde88133393"
+  integrity sha512-FA7CVUyp8GwLmmoCxZ441HHSizCEKcKFDf2awLC/E9ckVbM5R3fcipj9RjafHpTS/YubZggJxKJZl6E8c9iJxw==
+  dependencies:
+    eth-lib "^0.1.29"
+    ethereumjs-account "^3.0.0"
+    ethereumjs-util "^7.1.5"
+    web3-utils "^1.7.5"
 
 "@lukso/lsp-smart-contracts@^0.8.0":
   version "0.8.0"
@@ -2632,7 +2652,7 @@ eth-lib@0.2.8:
     elliptic "^6.4.0"
     xhr-request-promise "^0.1.2"
 
-eth-lib@^0.1.26:
+eth-lib@^0.1.26, eth-lib@^0.1.29:
   version "0.1.29"
   resolved "https://registry.yarnpkg.com/eth-lib/-/eth-lib-0.1.29.tgz#0c11f5060d42da9f931eab6199084734f4dbd1d9"
   integrity sha512-bfttrr3/7gG4E02HoWTDUcDDslN003OlOoBxk9virpAZQ1ja/jDgwkWB8QfJF7ojuEowrqy+lzp9VcJG7/k5bQ==
@@ -2751,6 +2771,15 @@ ethereumjs-account@^2.0.3:
     rlp "^2.0.0"
     safe-buffer "^5.1.1"
 
+ethereumjs-account@^3.0.0:
+  version "3.0.0"
+  resolved "https://registry.yarnpkg.com/ethereumjs-account/-/ethereumjs-account-3.0.0.tgz#728f060c8e0c6e87f1e987f751d3da25422570a9"
+  integrity sha512-WP6BdscjiiPkQfF9PVfMcwx/rDvfZTjFKY0Uwc09zSQr9JfIVH87dYIJu0gNhBhpmovV4yq295fdllS925fnBA==
+  dependencies:
+    ethereumjs-util "^6.0.0"
+    rlp "^2.2.1"
+    safe-buffer "^5.1.1"
+
 ethereumjs-block@^1.2.2:
   version "1.7.1"
   resolved "https://registry.yarnpkg.com/ethereumjs-block/-/ethereumjs-block-1.7.1.tgz#78b88e6cc56de29a6b4884ee75379b6860333c3f"
@@ -2820,7 +2849,7 @@ ethereumjs-util@^6.0.0, ethereumjs-util@^6.2.1:
     ethjs-util "0.1.6"
     rlp "^2.2.3"
 
-ethereumjs-util@^7.1.0, ethereumjs-util@^7.1.1, ethereumjs-util@^7.1.2, ethereumjs-util@^7.1.5:
+ethereumjs-util@^7.1.0, ethereumjs-util@^7.1.1, ethereumjs-util@^7.1.2, ethereumjs-util@^7.1.4, ethereumjs-util@^7.1.5:
   version "7.1.5"
   resolved "https://registry.yarnpkg.com/ethereumjs-util/-/ethereumjs-util-7.1.5.tgz#9ecf04861e4fbbeed7465ece5f23317ad1129181"
   integrity sha512-SDl5kKrQAudFBUe5OJM9Ac6WmMyYmXX/6sTmLZ3ffG2eY6ZIGBes3pEDxNN6V72WyOw4CPD5RomKdsa8DAAwLg==
@@ -3502,6 +3531,11 @@ http-signature@~1.2.0:
     assert-plus "^1.0.0"
     jsprim "^1.2.2"
     sshpk "^1.7.0"
+
+http-status@^1.6.2:
+  version "1.6.2"
+  resolved "https://registry.yarnpkg.com/http-status/-/http-status-1.6.2.tgz#6dc05188a9856d67d96e48e8b4fd645c719ce82a"
+  integrity sha512-oUExvfNckrpTpDazph7kNG8sQi5au3BeTo0idaZFXEhTaJKu7GNJCLHI0rYY2wljm548MSTM+Ljj/c6anqu2zQ==
 
 http2-wrapper@^1.0.0-beta.5.2:
   version "1.0.3"
@@ -4991,7 +5025,7 @@ ripemd160@^2.0.0, ripemd160@^2.0.1:
     hash-base "^3.0.0"
     inherits "^2.0.1"
 
-rlp@^2.0.0, rlp@^2.2.3, rlp@^2.2.4:
+rlp@^2.0.0, rlp@^2.2.1, rlp@^2.2.3, rlp@^2.2.4:
   version "2.2.7"
   resolved "https://registry.yarnpkg.com/rlp/-/rlp-2.2.7.tgz#33f31c4afac81124ac4b283e2bd4d9720b30beaf"
   integrity sha512-d5gdPmgQ0Z+AklL2NVXr/IoSjNZFfTVvQWzL/AM2AOcSzYP2xjlb0AC8YyCLc41MSNf6P6QVtjgPdmVtzb+4lQ==
@@ -5862,7 +5896,7 @@ web3-core@1.8.2:
     web3-core-requestmanager "1.8.2"
     web3-utils "1.8.2"
 
-web3-eth-abi@1.8.2:
+web3-eth-abi@1.8.2, web3-eth-abi@^1.7.3:
   version "1.8.2"
   resolved "https://registry.yarnpkg.com/web3-eth-abi/-/web3-eth-abi-1.8.2.tgz#16e1e9be40e2527404f041a4745111211488f31a"
   integrity sha512-Om9g3kaRNjqiNPAgKwGT16y+ZwtBzRe4ZJFGjLiSs6v5I7TPNF+rRMWuKnR6jq0azQZDj6rblvKFMA49/k48Og==
@@ -5989,7 +6023,7 @@ web3-provider-engine@16.0.3:
     xhr "^2.2.0"
     xtend "^4.0.1"
 
-web3-providers-http@1.8.2:
+web3-providers-http@1.8.2, web3-providers-http@^1.8.0:
   version "1.8.2"
   resolved "https://registry.yarnpkg.com/web3-providers-http/-/web3-providers-http-1.8.2.tgz#fbda3a3bbc8db004af36e91bec35f80273b37885"
   integrity sha512-2xY94IIEQd16+b+vIBF4IC1p7GVaz9q4EUFscvMUjtEq4ru4Atdzjs9GP+jmcoo49p70II0UV3bqQcz0TQfVyQ==
@@ -6026,7 +6060,7 @@ web3-shh@1.8.2:
     web3-core-subscriptions "1.8.2"
     web3-net "1.8.2"
 
-web3-utils@1.8.2:
+web3-utils@1.8.2, web3-utils@^1.7.3, web3-utils@^1.7.5:
   version "1.8.2"
   resolved "https://registry.yarnpkg.com/web3-utils/-/web3-utils-1.8.2.tgz#c32dec5e9b955acbab220eefd7715bc540b75cc9"
   integrity sha512-v7j6xhfLQfY7xQDrUP0BKbaNrmZ2/+egbqP9q3KYmOiPpnvAfol+32slgL0WX/5n8VPvKCK5EZ1HGrAVICSToA==
