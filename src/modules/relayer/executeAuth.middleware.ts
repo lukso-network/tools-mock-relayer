@@ -1,5 +1,6 @@
 import { EIP191Signer } from "@lukso/eip191-signer.js";
 import { ethers } from "ethers";
+import { getAddress } from "ethers/lib/utils";
 import { NextFunction, Request, Response } from "express";
 import httpStatus from "http-status";
 
@@ -8,12 +9,53 @@ import { UniversalProfile__factory } from "../../../types/ethers-v5";
 import { CHAIN_ID, IS_VALID_SIGNATURE_MAGIC_VALUE } from "../../globals";
 import { getProvider } from "../../libs/ethers.service";
 
+export async function validateRequestPayload(executeRequest: ExecutePayload) {
+  const { address, transaction } = executeRequest;
+
+  let isValidRequest = true;
+  let errorMessage = "";
+
+  try {
+    if (!address) throw new Error();
+
+    getAddress(address);
+  } catch {
+    isValidRequest = false;
+    errorMessage = "Invalid address provided";
+  }
+
+  try {
+    if (!transaction) throw new Error();
+
+    const { abi, signature, nonce } = transaction;
+
+    if (!abi || !signature || !nonce) {
+      throw new Error();
+    }
+  } catch {
+    isValidRequest = false;
+    errorMessage = "Invalid transaction parameters";
+    return;
+  }
+
+  if (!isValidRequest) {
+    throw new Error(errorMessage);
+  }
+}
+
 export async function validateExecuteSignature(
   req: Request,
   res: Response,
   next: NextFunction
 ) {
   const executeRequest: ExecutePayload = req.body;
+
+  try {
+    validateRequestPayload(executeRequest);
+  } catch (error: any) {
+    res.status(httpStatus.BAD_REQUEST).send(error.message);
+    return;
+  }
 
   const { address, transaction } = executeRequest;
 
