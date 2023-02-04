@@ -16,6 +16,18 @@ cp .env.example .env
 
 Fill the values with real data. A `SIGNER_PRIVATE_KEY` must be provided **with sufficient balance to execute transactions on the blockchain**.
 
+Install the dependencies:
+
+```sh
+yarn
+```
+
+Run the application:
+
+```sh
+yarn run dev
+```
+
 ### Transaction Gate
 
 This project does not handle concurrent transactions. To prevent nonce reuse errors, a transaction gate is implemented which will block incoming transactions if there is already a transaction pending.
