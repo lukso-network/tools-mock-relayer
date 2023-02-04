@@ -1,5 +1,5 @@
 import { createServer } from "./config/express";
-import { logger } from "./config/logger";
+import { logger } from "./libs/logger.service";
 import router from "./modules/relayer/relayer.controller";
 import http from "http";
 import { AddressInfo } from "net";

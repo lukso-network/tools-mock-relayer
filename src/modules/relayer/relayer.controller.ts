@@ -2,7 +2,7 @@ import express, { Request, Response } from "express";
 
 import { ExecutePayload } from "./relayer.interfaces";
 import { handleExecute } from "./relayer.service";
-import { logger } from "../../config/logger";
+import { logger } from "../../libs/logger.service";
 
 const router = express.Router();
 

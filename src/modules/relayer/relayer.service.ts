@@ -5,7 +5,7 @@ import {
   LSP6KeyManager__factory,
   UniversalProfile__factory,
 } from "../../../types/ethers-v5";
-import { logger } from "../../config/logger";
+import { logger } from "../../libs/logger.service";
 import { getProvider } from "../../libs/ethers.service";
 import { signTransaction } from "../../libs/signer.service";
 
