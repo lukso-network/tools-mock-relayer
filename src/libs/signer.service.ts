@@ -15,7 +15,7 @@ export function getSigner() {
   const provider = getProvider();
 
   if (!SIGNER_PRIVATE_KEY) {
-    throw new Error("No signing key set");
+    throw new Error("Error: No signing key set");
   }
 
   if (!signer) {
