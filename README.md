@@ -2,6 +2,16 @@
 
 Skeleton example Transaction Relayer Service according to [LSP15-TransactionRelayServiceAPI](https://github.com/lukso-network/LIPs/blob/main/LSPs/LSP-15-TransactionRelayServiceAPI.md) API specification.
 
+## Usage
+
+To begin sending transaction with the Dummy Transaction Relayer create a `.env` file to hold configuration parameters:
+
+```sh
+cp .env.example .env
+```
+
+Fill the values with real data. A `SIGNER_PRIVATE_KEY` must be provided **with sufficient balance to execute transactions on the blockchain**.
+
 ## API
 
 #### POST `/execute`
