@@ -2,6 +2,10 @@
 
 Skeleton example Transaction Relayer Service according to [LSP15-TransactionRelayServiceAPI](https://github.com/lukso-network/LIPs/blob/main/LSPs/LSP-15-TransactionRelayServiceAPI.md) API specification.
 
+This application is a starter project for an LSP15 Transaction Relayer Service for example and testing purposes and should not be considered production ready.
+
+This application does not include any authentication, quota or nonce management. A real Transaction Relayer Service should consider how to manage signer key nonces appropriately to be able to handle concurrent transactions.
+
 ## Usage
 
 To begin sending transaction with the Dummy Transaction Relayer create a `.env` file to hold configuration parameters:
