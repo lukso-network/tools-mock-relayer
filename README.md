@@ -1,4 +1,6 @@
-# Mock Transaction Relayer
+# Mock Transaction Relayer &middot; [![lsp-smart-contracts](https://img.shields.io/static/v1?label=lsp-smart-contract&message=v0.8.0&color=green)](https://github.com/lukso-network/lsp-smart-contracts/releases/tag/v0.8.0)
+
+---
 
 Skeleton example Transaction Relayer Service according to [LSP15-TransactionRelayServiceAPI](https://github.com/lukso-network/LIPs/blob/main/LSPs/LSP-15-TransactionRelayServiceAPI.md) API specification.
 
