@@ -65,8 +65,15 @@ export async function validateExecuteSignature(
   const keyManagerAddress = await universalProfile.owner();
 
   const message = ethers.utils.solidityPack(
-    ["uint256", "uint256", "uint256", "uint256", "bytes"],
-    [6, CHAIN_ID, transaction.nonce, 0, transaction.abi]
+    ["uint256", "uint256", "uint256", "uint256", "uint256", "bytes"],
+    [
+      6,
+      CHAIN_ID,
+      transaction.nonce,
+      transaction.validityTimestamps || 0,
+      0,
+      transaction.abi,
+    ]
   );
 
   const eip191Signer = new EIP191Signer();

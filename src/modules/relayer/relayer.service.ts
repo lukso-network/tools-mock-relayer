@@ -28,13 +28,21 @@ export async function handleExecute(address: string, transaction: Transaction) {
     provider
   );
 
-  const gasLimit = await keyManager.estimateGas[
-    "executeRelayCall(bytes,uint256,bytes)"
-  ](transaction.signature, transaction.nonce, transaction.abi);
+  const gasLimit = await keyManager.estimateGas.executeRelayCall(
+    transaction.signature,
+    transaction.nonce,
+    transaction.validityTimestamps || 0,
+    transaction.abi
+  );
 
   const transactionData = keyManager.interface.encodeFunctionData(
-    "executeRelayCall(bytes,uint256,bytes)",
-    [transaction.signature, transaction.nonce, transaction.abi]
+    "executeRelayCall",
+    [
+      transaction.signature,
+      transaction.nonce,
+      transaction.validityTimestamps || 0,
+      transaction.abi,
+    ]
   );
 
   logger.info(`Signing executeRelayCall transaction`);

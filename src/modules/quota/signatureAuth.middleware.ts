@@ -1,4 +1,5 @@
 import ERC725 from "@erc725/erc725.js";
+import { ERC725YDataKeys, INTERFACE_IDS } from "@lukso/lsp-smart-contracts";
 import { ethers } from "ethers";
 import { arrayify } from "ethers/lib/utils";
 import { NextFunction, Request, Response } from "express";
@@ -6,11 +7,7 @@ import httpStatus from "http-status";
 
 import { SignatureAuth } from "./quota.interfaces";
 import { UniversalProfile__factory } from "../../../types/ethers-v5";
-import {
-  ADDRESS_PERMISSIONS_PREFIX,
-  LSP0_INTERFACE_ID,
-  TIMESTAMP_AUTH_WINDOW_IN_SECONDS,
-} from "../../globals";
+import { TIMESTAMP_AUTH_WINDOW_IN_SECONDS } from "../../globals";
 import { getProvider } from "../../libs/ethers.service";
 
 export async function validateSignatureAuthentication(
@@ -39,7 +36,7 @@ export async function validateSignatureAuthentication(
 
   try {
     const isUniversalProfile = await universalProfile.supportsInterface(
-      LSP0_INTERFACE_ID
+      INTERFACE_IDS.LSP0ERC725Account
     );
 
     if (!isUniversalProfile) {
@@ -83,8 +80,8 @@ export async function validateSignatureAuthentication(
     return;
   }
 
-  const signerPermissions = await universalProfile["getData(bytes32)"](
-    ADDRESS_PERMISSIONS_PREFIX + signer.slice(2)
+  const signerPermissions = await universalProfile.getData(
+    ERC725YDataKeys.LSP6["AddressPermissions:Permissions"] + signer.slice(2)
   );
 
   if (
