@@ -1,6 +1,6 @@
 import { ethers } from "ethers";
 
-import { enableTransactionGate } from "../globals";
+import { ENABLE_TRANSACTION_GATE } from "../globals";
 import { logger } from "../libs/logger.service";
 
 let acceptNextTransaction = true;
@@ -20,7 +20,7 @@ export async function waitForTransaction(
 }
 
 export function transactionGate() {
-  if (enableTransactionGate && !acceptNextTransaction) {
+  if (ENABLE_TRANSACTION_GATE && !acceptNextTransaction) {
     throw new Error(
       `Transaction in progress. Waiting until transaction ${currentTransaction} has been validated`
     );
