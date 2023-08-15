@@ -42,6 +42,13 @@ This can be turned on or off by setting `ENABLE_TRANSACTION_GATE` to `true` or `
 
 Executes a signed transaction on behalf of a Universal Profile using `executeRelayCall()`.
 
+- `address` - The address of the Universal Profile which is executing the transaction.
+- `transaction` - An object containing the transaction parameters which will executed with `executeRelayCall`.
+  - `abi` - The abi-encoded transaction data (_e.g: a function call on the Universal Profile smart contract_) which will be passed as the payload parameter to the `executeRelayCall` function.
+  - `signature` - The signed message according to LSP6 specification.
+  - `nonce` - The nonce of the KeyManager fetched by calling `getNonce(address address, uint128 channelId)` on the LSP6 KeyManager contract.
+  - `validityTimestamps` (optional) - Two concatenated `uint128` timestamps which indicate a time duration for which the transaction will be considered valid. If no validityTimestamps parameter is passed the relayer should assume that validityTimestamps is `0` and the transaction will be valid indefinitely until it is executed.
+
 ##### Request body
 
 ```json
@@ -50,7 +57,8 @@ Executes a signed transaction on behalf of a Universal Profile using `executeRel
   "transaction": {
     "abi": "0x7f23690c5ef83ad9559033e6e941db7d7c495acdce616347d28e90c7ce47cbfcfcad3bc5000000000000000000000000000000000000000000000000000000000000004000000000000000000000000000000000000000000000000000000000000000596f357c6aa5a21984a83b7eef4cb0720ac1fcf5a45e9d84c653d97b71bbe89b7a728c386a697066733a2f2f516d624b43744b4d7573376741524470617744687a32506a4e36616f64346b69794e436851726d3451437858454b00000000000000",
     "signature": "0x43c958b1729586749169599d7e776f18afc6223c7da21107161477d291d497973b4fc50a724b1b2ab98f3f8cf1d5cdbbbdf3512e4fbfbdc39732229a15beb14a1b",
-    "nonce": 1
+    "nonce": 1,
+    "validityTimestamps": "0x0000000000000000000000006420f3f000000000000000000000000065ec82d0"
   }
 }
 ```
