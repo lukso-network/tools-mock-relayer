@@ -42,6 +42,7 @@ This can be turned on or off by setting `ENABLE_TRANSACTION_GATE` to `true` or `
 This project allows to handle multiple quota modes based on an ENV parameter `QUOTA_MODE`
 If you do not provide specific `QUOTA_MODE` default value will be `DummyQuota`.
 For all available `QUOTA_MODES` see [THIS FILE](src/modules/quota/quota.service.ts)
+`QUOTA_TOKEN_ADDRESS` Should be an address to the LSP7 token, that will be representing the usage. 
 
 #### POST `/execute`
 
