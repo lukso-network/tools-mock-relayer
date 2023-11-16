@@ -38,6 +38,11 @@ This can be turned on or off by setting `ENABLE_TRANSACTION_GATE` to `true` or `
 
 ## LSP15 Transaction Relayer Service API Specification
 
+### QuotaMode
+This project allows to handle multiple quota modes based on an ENV parameter `QUOTA_MODE`
+If you do not provide specific `QUOTA_MODE` default value will be `DummyQuota`.
+For all available `QUOTA_MODES` see [THIS FILE](src/modules/quota/quota.service.ts)
+
 #### POST `/execute`
 
 Executes a signed transaction on behalf of a Universal Profile using `executeRelayCall()`.
