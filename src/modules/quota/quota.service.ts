@@ -17,7 +17,7 @@ export enum QuotaMode {
 
 const quotaTokenAddress: string =
   process.env.QUOTA_TOKEN_ADDRESS ||
-  "0x1f9090aae28b8a3dceadf281b0f12828e676c326";
+  "0x2454A56269b1a978655D1aeCD24d6cc7c59aD5b6";
 
 export async function handleQuotas(
   req: Request,
@@ -28,7 +28,7 @@ export async function handleQuotas(
     const { address, timestamp, signature } =
       signatureAuthParameters as SignatureAuth;
     if (!address || !timestamp || !signature) {
-      return new Error(
+      throw new Error(
         "handleQuotas function should be used only if signature is present in the request"
       );
     }
@@ -41,9 +41,9 @@ export async function handleQuotas(
     const quota = await lsp7Token.balanceOf(address);
 
     return {
-      quota: quota,
+      quota: quota.toNumber(),
       unit: "transactionCount",
-      totalQuota: quota,
+      totalQuota: quota.toNumber(),
       resetDate: getDummyResetDate(new Date()),
     };
   }
