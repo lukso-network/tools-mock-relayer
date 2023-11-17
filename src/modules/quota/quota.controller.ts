@@ -5,7 +5,7 @@ import { handleQuotas, QuotaMode } from "./quota.service";
 import { validateSignatureAuthentication } from "./signatureAuth.middleware";
 
 const quotaController = express.Router();
-const quotaMode: QuotaMode =
+export const quotaMode: QuotaMode =
   (process.env.QUOTA_MODE as QuotaMode) || QuotaMode.DummyQuota;
 
 quotaController.post(

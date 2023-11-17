@@ -3,7 +3,6 @@
  * Open for extensions if people are willing to implement them in QuotaModes enums
  */
 
-
 import { Request } from "express";
 
 import { SignatureAuth } from "./quota.interfaces";
@@ -32,18 +31,12 @@ export async function handleQuotas(
         "handleQuotas function should be used only if signature is present in the request"
       );
     }
-
-    const provider = getProvider();
-    const lsp7Token = LSP7DigitalAsset__factory.connect(
-      quotaTokenAddress,
-      provider
-    );
-    const quota = await lsp7Token.balanceOf(address);
+    const quota = await getTokenTransactionsCountQuota(signatureAuthParameters);
 
     return {
-      quota: quota.toNumber(),
+      quota: quota,
       unit: "transactionCount",
-      totalQuota: quota.toNumber(),
+      totalQuota: quota,
       resetDate: getDummyResetDate(new Date()),
     };
   }
@@ -58,6 +51,19 @@ function handleDummyQuota() {
     totalQuota: 5000000,
     resetDate: getDummyResetDate(new Date()),
   };
+}
+
+export async function getTokenTransactionsCountQuota(
+  signatureAuth: SignatureAuth
+): Promise<number> {
+  const provider = getProvider();
+  const lsp7Token = LSP7DigitalAsset__factory.connect(
+    quotaTokenAddress,
+    provider
+  );
+  const quota = await lsp7Token.balanceOf(signatureAuth.address);
+
+  return quota.toNumber();
 }
 
 function getDummyResetDate(resetDate: Date) {
