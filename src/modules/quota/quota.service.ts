@@ -33,10 +33,11 @@ export async function handleQuotas(
     }
     const quota = await getTokenTransactionsCountQuota(signatureAuthParameters);
 
+    //  Ideally plugin deos transactionCount model, but at this moment quotas are multiplied
     return {
-      quota: quota,
+      quota: quota * 100000,
       unit: "transactionCount",
-      totalQuota: quota,
+      totalQuota: quota * 100000,
       resetDate: getDummyResetDate(new Date()),
     };
   }

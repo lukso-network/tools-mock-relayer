@@ -1,16 +1,10 @@
-import ERC725 from "@erc725/erc725.js";
-import { ERC725YDataKeys, INTERFACE_IDS } from "@lukso/lsp-smart-contracts";
-import { ethers } from "ethers";
-import { arrayify } from "ethers/lib/utils";
+
 import { NextFunction, Request, Response } from "express";
 import httpStatus from "http-status";
 
+import { quotaMode } from "./quota.controller";
 import { SignatureAuth } from "./quota.interfaces";
-import { UniversalProfile__factory } from "../../../types/ethers-v5";
-import { TIMESTAMP_AUTH_WINDOW_IN_SECONDS } from "../../globals";
-import { getProvider } from "../../libs/ethers.service";
-import {handleQuotas, QuotaMode} from "./quota.service";
-import {quotaMode} from "./quota.controller";
+import { getTokenTransactionsCountQuota, QuotaMode } from "./quota.service";
 
 export async function quotaMiddleware(
   req: Request,
@@ -22,7 +16,15 @@ export async function quotaMiddleware(
     return;
   }
 
-  handleQuotas(req, quotaMode);
+  const quotaLeft = await getTokenTransactionsCountQuota(
+    req.body as SignatureAuth
+  );
+
+  if (quotaLeft < 1) {
+    // If there is no enough quota UPGRADE it
+    res.status(httpStatus.UPGRADE_REQUIRED);
+    return;
+  }
 
   next();
 }

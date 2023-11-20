@@ -5,12 +5,14 @@ import { validateExecuteSignature } from "./executeAuth.middleware";
 import { ExecutePayload } from "./relayer.interfaces";
 import { handleExecute } from "./relayer.service";
 import { logger } from "../../libs/logger.service";
+import { quotaMiddleware } from "../quota/quota.middleware";
 
 const relayerController = express.Router();
 
 relayerController.post(
   "/execute",
   validateExecuteSignature,
+  quotaMiddleware,
   async (req: Request, res: Response) => {
     const { address, transaction } = req.body as ExecutePayload;
 
