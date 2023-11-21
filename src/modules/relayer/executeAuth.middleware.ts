@@ -1,5 +1,5 @@
 import { EIP191Signer } from "@lukso/eip191-signer.js";
-import { ethers } from "ethers";
+import { BigNumber, ethers } from "ethers";
 import { getAddress } from "ethers/lib/utils";
 import { NextFunction, Request, Response } from "express";
 import httpStatus from "http-status";
@@ -8,6 +8,18 @@ import { ExecutePayload } from "./relayer.interfaces";
 import { UniversalProfile__factory } from "../../../types/ethers-v5";
 import { CHAIN_ID, IS_VALID_SIGNATURE_MAGIC_VALUE } from "../../globals";
 import { getProvider } from "../../libs/ethers.service";
+import { getSigner } from "../../libs/signer.service";
+import { quotaMode } from "../quota/quota.controller";
+import {
+  getAuthorizedAmountFor,
+  QuotaMode,
+  quotaTokenAddress,
+} from "../quota/quota.service";
+
+const isQuotaModeTransactionsCount =
+  QuotaMode.TokenQuotaTransactionsCount === quotaMode;
+
+const linkToQuotaCharge = "https://docs.un1.io/faq";
 
 export async function validateRequestPayload(executeRequest: ExecutePayload) {
   const { address, transaction } = executeRequest;
@@ -41,6 +53,41 @@ export async function validateRequestPayload(executeRequest: ExecutePayload) {
   if (!isValidRequest) {
     throw new Error(errorMessage);
   }
+}
+
+export async function guardTokenSpendingQuota(
+  req: Request,
+  res: Response,
+  next: NextFunction
+) {
+  if (!isQuotaModeTransactionsCount) {
+    next();
+
+    return;
+  }
+
+  const { address } = req.body as ExecutePayload;
+
+  const tokensByOperator = isQuotaModeTransactionsCount
+    ? await getAuthorizedAmountFor({
+        address: address,
+        timestamp: 0,
+        signature: "",
+      })
+    : BigNumber.from(0);
+
+  if (isQuotaModeTransactionsCount && tokensByOperator.lt(BigNumber.from(1))) {
+    const operatorAddress = getSigner().address;
+    res.status(httpStatus.UPGRADE_REQUIRED).send({
+      message: `Authorize relayer to your LSP7 tokens. Visit ${linkToQuotaCharge}`,
+      tokenAddress: quotaTokenAddress,
+      address: address,
+      operator: operatorAddress,
+    });
+    return;
+  }
+
+  next();
 }
 
 export async function validateExecuteSignature(

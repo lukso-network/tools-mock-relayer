@@ -44,6 +44,13 @@ If you do not provide specific `QUOTA_MODE` default value will be `DummyQuota`.
 For all available `QUOTA_MODES` see [THIS FILE](src/modules/quota/quota.service.ts)
 `QUOTA_TOKEN_ADDRESS` Should be an address to the LSP7 token, that will be representing the usage. 
 
+#### Networks
+If you want to deploy relayer to LUKSO mainnet you need to change
+```.env
+IS_VALID_SIGNATURE_MAGIC_VALUE: 0xffffffff
+```
+
+
 #### POST `/execute`
 
 Executes a signed transaction on behalf of a Universal Profile using `executeRelayCall()`.

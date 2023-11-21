@@ -3,20 +3,20 @@
  * Open for extensions if people are willing to implement them in QuotaModes enums
  */
 
-import {BigNumber} from "ethers";
-import {Request} from "express";
+import { BigNumber } from "ethers";
+import { Request } from "express";
 
-import {SignatureAuth} from "./quota.interfaces";
-import {LSP7DigitalAsset__factory} from "../../../types/ethers-v5";
-import {getProvider} from "../../libs/ethers.service";
-import {getSigner} from "../../libs/signer.service";
+import { SignatureAuth } from "./quota.interfaces";
+import { LSP7DigitalAsset__factory } from "../../../types/ethers-v5";
+import { getProvider } from "../../libs/ethers.service";
+import { getSigner } from "../../libs/signer.service";
 
 export enum QuotaMode {
   DummyQuota = "DummyQuota",
   TokenQuotaTransactionsCount = "TokenQuotaTransactionsCount",
 }
 
-const quotaTokenAddress: string =
+export const quotaTokenAddress: string =
   process.env.QUOTA_TOKEN_ADDRESS ||
   "0x2454A56269b1a978655D1aeCD24d6cc7c59aD5b6";
 
@@ -33,20 +33,18 @@ export async function handleQuotas(
         "handleQuotas function should be used only if signature is present in the request"
       );
     }
-    const totalQuota = await getTokenTransactionsCountQuota(
-      signatureAuthParameters
-    );
+    const quota = await getTokenTransactionsCountQuota(signatureAuthParameters);
     const tokensByOperator = await getAuthorizedAmountFor(
       signatureAuthParameters
     );
 
-    //  Ideally plugin deos transactionCount model, but at this moment quotas are multiplied
+    //  Ideally UP plugin does transactionCount model, but at this moment quotas are multiplied
     return {
-      //  Quota stands for tokens that are authorized by Operator
-      quota: tokensByOperator.toNumber() * 1000000,
-      unit: "transactionCount",
       //  total quota represents all the LSP7 tokens that UP has
-      totalQuota: totalQuota.toNumber() * 1000000,
+      quota: quota.toNumber() * 100000000000,
+      unit: "transactionCount",
+      //  total quota represents all the LSP7 that was authorized in this backend
+      totalQuota: tokensByOperator.toNumber(),
       resetDate: getDummyResetDate(new Date()),
     };
   }
