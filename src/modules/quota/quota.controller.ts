@@ -3,7 +3,6 @@ import httpStatus from "http-status";
 
 import { handleQuotas, QuotaMode } from "./quota.service";
 import { validateSignatureAuthentication } from "./signatureAuth.middleware";
-import {quotaMiddleware} from "./quota.middleware";
 
 const quotaController = express.Router();
 export const quotaMode: QuotaMode =

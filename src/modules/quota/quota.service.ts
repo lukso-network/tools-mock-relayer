@@ -3,11 +3,13 @@
  * Open for extensions if people are willing to implement them in QuotaModes enums
  */
 
-import { Request } from "express";
+import {BigNumber} from "ethers";
+import {Request} from "express";
 
-import { SignatureAuth } from "./quota.interfaces";
-import { LSP7DigitalAsset__factory } from "../../../types/ethers-v5";
-import { getProvider } from "../../libs/ethers.service";
+import {SignatureAuth} from "./quota.interfaces";
+import {LSP7DigitalAsset__factory} from "../../../types/ethers-v5";
+import {getProvider} from "../../libs/ethers.service";
+import {getSigner} from "../../libs/signer.service";
 
 export enum QuotaMode {
   DummyQuota = "DummyQuota",
@@ -31,13 +33,20 @@ export async function handleQuotas(
         "handleQuotas function should be used only if signature is present in the request"
       );
     }
-    const quota = await getTokenTransactionsCountQuota(signatureAuthParameters);
+    const totalQuota = await getTokenTransactionsCountQuota(
+      signatureAuthParameters
+    );
+    const tokensByOperator = await getAuthorizedAmountFor(
+      signatureAuthParameters
+    );
 
     //  Ideally plugin deos transactionCount model, but at this moment quotas are multiplied
     return {
-      quota: quota * 100000,
+      //  Quota stands for tokens that are authorized by Operator
+      quota: tokensByOperator.toNumber() * 1000000,
       unit: "transactionCount",
-      totalQuota: quota * 100000,
+      //  total quota represents all the LSP7 tokens that UP has
+      totalQuota: totalQuota.toNumber() * 1000000,
       resetDate: getDummyResetDate(new Date()),
     };
   }
@@ -56,15 +65,28 @@ function handleDummyQuota() {
 
 export async function getTokenTransactionsCountQuota(
   signatureAuth: SignatureAuth
-): Promise<number> {
+): Promise<BigNumber> {
   const provider = getProvider();
   const lsp7Token = LSP7DigitalAsset__factory.connect(
     quotaTokenAddress,
     provider
   );
-  const quota = await lsp7Token.balanceOf(signatureAuth.address);
+  return await lsp7Token.balanceOf(signatureAuth.address);
+}
 
-  return quota.toNumber();
+export async function getAuthorizedAmountFor(
+  signatureAuth: SignatureAuth
+): Promise<BigNumber> {
+  const provider = getProvider();
+  const lsp7Token = LSP7DigitalAsset__factory.connect(
+    quotaTokenAddress,
+    provider
+  );
+  const signer = getSigner();
+  return await lsp7Token.authorizedAmountFor(
+    signer.address,
+    signatureAuth.address
+  );
 }
 
 function getDummyResetDate(resetDate: Date) {

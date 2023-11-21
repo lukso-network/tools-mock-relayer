@@ -8,6 +8,7 @@ export const ENABLE_TRANSACTION_GATE =
 
 export const CHAIN_ID = process.env.CHAIN_ID || 4201;
 
-export const IS_VALID_SIGNATURE_MAGIC_VALUE = "0x1626ba7e";
+export const IS_VALID_SIGNATURE_MAGIC_VALUE =
+  process.env.IS_VALID_SIGNATURE_MAGIC_VALUE || "0x1626ba7e";
 
 export const TIMESTAMP_AUTH_WINDOW_IN_SECONDS = 5;
