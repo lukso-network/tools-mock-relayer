@@ -10,6 +10,7 @@ import { SignatureAuth } from "./quota.interfaces";
 import { LSP7DigitalAsset__factory } from "../../../types/ethers-v5";
 import { OPERATOR_UP_ADDRESS } from "../../globals";
 import { getProvider } from "../../libs/ethers.service";
+import { getSigner } from "../../libs/signer.service";
 
 export enum QuotaMode {
   DummyQuota = "DummyQuota",
@@ -80,6 +81,16 @@ export async function getAuthorizedAmountFor(
     quotaTokenAddress,
     provider
   );
+
+  console.log(
+    "middleware:AuthorizedQuota",
+      (await lsp7Token.authorizedAmountFor(
+      getSigner().address,
+      signatureAuth.address
+    )).toNumber()
+  );
+
+  return BigNumber.from(1);
 
   return await lsp7Token.authorizedAmountFor(
     OPERATOR_UP_ADDRESS,

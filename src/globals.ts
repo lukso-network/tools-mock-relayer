@@ -13,6 +13,8 @@ export const IS_VALID_SIGNATURE_MAGIC_VALUE =
 
 export const TIMESTAMP_AUTH_WINDOW_IN_SECONDS = 5;
 
+export const IS_QUOTA_MODE_TRANSACTIONS_COUNT =
+  "TokenQuotaTransactionsCount" === process.env.QUOTA_MODE;
 export const OPERATOR_UP_ADDRESS =
   process.env.OPERATOR_UP_ADDRESS ||
   "0xE4C4Bec85bEe30a98dBBe7Ae1348fDaE10e0aA21";

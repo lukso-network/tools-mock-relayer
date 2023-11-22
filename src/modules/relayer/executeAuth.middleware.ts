@@ -5,19 +5,19 @@ import { NextFunction, Request, Response } from "express";
 import httpStatus from "http-status";
 
 import { ExecutePayload } from "./relayer.interfaces";
-import {LSP6KeyManager__factory, LSP7DigitalAsset__factory, UniversalProfile__factory} from "../../../types/ethers-v5";
-import {CHAIN_ID, IS_VALID_SIGNATURE_MAGIC_VALUE, LINK_TO_QUOTA_CHARGE, OPERATOR_UP_ADDRESS} from "../../globals";
+import { UniversalProfile__factory } from "../../../types/ethers-v5";
+import {
+  CHAIN_ID,
+  IS_QUOTA_MODE_TRANSACTIONS_COUNT,
+  IS_VALID_SIGNATURE_MAGIC_VALUE,
+  LINK_TO_QUOTA_CHARGE,
+  OPERATOR_UP_ADDRESS,
+} from "../../globals";
 import { getProvider } from "../../libs/ethers.service";
-import { getSigner } from "../../libs/signer.service";
-import { quotaMode } from "../quota/quota.controller";
 import {
   getAuthorizedAmountFor,
-  QuotaMode,
   quotaTokenAddress,
 } from "../quota/quota.service";
-
-const isQuotaModeTransactionsCount =
-  QuotaMode.TokenQuotaTransactionsCount === quotaMode;
 
 export async function validateRequestPayload(executeRequest: ExecutePayload) {
   const { address, transaction } = executeRequest;
@@ -58,7 +58,7 @@ export async function guardTokenSpendingQuota(
   res: Response,
   next: NextFunction
 ) {
-  if (!isQuotaModeTransactionsCount) {
+  if (!IS_QUOTA_MODE_TRANSACTIONS_COUNT) {
     next();
 
     return;
@@ -66,7 +66,7 @@ export async function guardTokenSpendingQuota(
 
   const { address } = req.body as ExecutePayload;
 
-  const tokensByOperator = isQuotaModeTransactionsCount
+  const tokensByOperator = IS_QUOTA_MODE_TRANSACTIONS_COUNT
     ? await getAuthorizedAmountFor({
         address: address,
         timestamp: 0,
@@ -74,13 +74,15 @@ export async function guardTokenSpendingQuota(
       })
     : BigNumber.from(0);
 
-  if (isQuotaModeTransactionsCount && tokensByOperator.lt(BigNumber.from(1))) {
-    const operatorAddress = getSigner().address;
+  if (
+    IS_QUOTA_MODE_TRANSACTIONS_COUNT &&
+    tokensByOperator.lt(BigNumber.from(1))
+  ) {
     res.status(httpStatus.UPGRADE_REQUIRED).send({
       message: `Authorize relayer to your LSP7 tokens. Visit ${LINK_TO_QUOTA_CHARGE}`,
       tokenAddress: quotaTokenAddress,
       address: address,
-      operator: operatorAddress,
+      operator: OPERATOR_UP_ADDRESS,
     });
     return;
   }

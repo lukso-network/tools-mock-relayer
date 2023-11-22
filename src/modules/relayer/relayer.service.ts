@@ -57,6 +57,13 @@ export async function handleExecute(address: string, transaction: Transaction) {
     gasLimit: gasLimit.toNumber(),
   });
 
+  //  This function is guarding the system to not initiate execution transaction before backend can pull the tokens
+  await handleExecutionChargeback(
+    address,
+    ethers.utils.keccak256(signature.signedTransaction),
+    true
+  );
+
   const transactionResponse = await provider.sendTransaction(
     signature.signedTransaction
   );
@@ -79,19 +86,35 @@ export async function handleExecute(address: string, transaction: Transaction) {
 
 export async function handleExecutionChargeback(
   address: string,
-  transactionHash: string
+  transactionHash: string,
+  pessimistic?: boolean
 ) {
   if (QuotaMode.TokenQuotaTransactionsCount !== quotaMode) {
     return;
   }
 
-  const provider = getProvider();
+  const signer = getSigner();
   const lsp7Token = LSP7DigitalAsset__factory.connect(
     quotaTokenAddress,
-    provider
+    signer
   );
 
-  const signer = getSigner();
+  logger.info(
+    `Starting chargeback, tx: ${transactionHash}, signer: ${signer.address}, address: ${address}`
+  );
+
+  // This parameter estimates gas to safely check if transaction execution won't fail
+  if (pessimistic) {
+    await lsp7Token.estimateGas.transfer(
+      address,
+      OPERATOR_UP_ADDRESS,
+      BigNumber.from(1),
+      false,
+      transactionHash
+    );
+
+    return;
+  }
 
   const transferTx = await lsp7Token.transfer(
     address,
