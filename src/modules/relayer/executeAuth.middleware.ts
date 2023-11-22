@@ -5,8 +5,8 @@ import { NextFunction, Request, Response } from "express";
 import httpStatus from "http-status";
 
 import { ExecutePayload } from "./relayer.interfaces";
-import { UniversalProfile__factory } from "../../../types/ethers-v5";
-import { CHAIN_ID, IS_VALID_SIGNATURE_MAGIC_VALUE } from "../../globals";
+import {LSP6KeyManager__factory, LSP7DigitalAsset__factory, UniversalProfile__factory} from "../../../types/ethers-v5";
+import {CHAIN_ID, IS_VALID_SIGNATURE_MAGIC_VALUE, LINK_TO_QUOTA_CHARGE, OPERATOR_UP_ADDRESS} from "../../globals";
 import { getProvider } from "../../libs/ethers.service";
 import { getSigner } from "../../libs/signer.service";
 import { quotaMode } from "../quota/quota.controller";
@@ -18,8 +18,6 @@ import {
 
 const isQuotaModeTransactionsCount =
   QuotaMode.TokenQuotaTransactionsCount === quotaMode;
-
-const linkToQuotaCharge = "https://docs.un1.io/faq";
 
 export async function validateRequestPayload(executeRequest: ExecutePayload) {
   const { address, transaction } = executeRequest;
@@ -79,7 +77,7 @@ export async function guardTokenSpendingQuota(
   if (isQuotaModeTransactionsCount && tokensByOperator.lt(BigNumber.from(1))) {
     const operatorAddress = getSigner().address;
     res.status(httpStatus.UPGRADE_REQUIRED).send({
-      message: `Authorize relayer to your LSP7 tokens. Visit ${linkToQuotaCharge}`,
+      message: `Authorize relayer to your LSP7 tokens. Visit ${LINK_TO_QUOTA_CHARGE}`,
       tokenAddress: quotaTokenAddress,
       address: address,
       operator: operatorAddress,

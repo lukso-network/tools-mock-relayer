@@ -46,9 +46,34 @@ For all available `QUOTA_MODES` see [THIS FILE](src/modules/quota/quota.service.
 
 #### Networks
 If you want to deploy relayer to LUKSO mainnet you need to change
-```.env
-IS_VALID_SIGNATURE_MAGIC_VALUE: 0xffffffff
+```.shell
+IS_VALID_SIGNATURE_MAGIC_VALUE = 0xffffffff
 ```
+
+### Quota mode reliant variables
+#### QUOTA_MODE=TokenQuotaTransactionsCount
+.env variables
+```.shell
+QUOTA_MODE=TokenQuotaTransactionsCount
+QUOTA_TOKEN_ADDRESS = LSP7 TOKEN ADDRESS
+OPERATOR_ADDRESS=UP THAT HAS ENOUGH PERMISSION SET TO SIGNER/BACKEND EOA
+```
+Behaviour:
+- to get Quota as a signer you perform normal operation, but since UP Extension does not support 
+ `transactionCount` as an `unit` values are heavily multiplied. In `totalQuota` response you can see how many LSP7 tokens
+  approved the operator. In `quota` you will see all the tokens execution UP has.
+- backend on execute will optimistically assure that if `quota` > 0 UP can consume the /Execute endpoint, although   
+  if there is not enough LSP7 tokens that were approved to current operator backend will return `httpStatus.UPGRADE_REQUIRED`
+
+LSP 7 Token distribution:
+To gain access to the ecosystem there must be a distribution of LSP7 tokens, which is called `charger`.
+To use LSP 7 user must have the UP. User can create new profiles via relayer only if the user has at least one.
+There is a **PROFILE PARADOX** which you must solve by custom business logic.
+Once User has the UP, claiming tokens will be handled via `charger station` implementations.
+There is absolutely more to discover via this approach.
+
+For the LUKSO mainnet you can use UN
+
 
 
 #### POST `/execute`
