@@ -21,3 +21,7 @@ export const OPERATOR_UP_ADDRESS =
 
 export const LINK_TO_QUOTA_CHARGE =
   process.env.OPERATOR_CHARGE_LINK || "https://docs.un1.io/faq";
+
+export const QUOTA_CONTRACT_ADDRESS =
+  process.env.QUOTA_TOKEN_ADDRESS ||
+  "0x12f4B143C2039ddD56833dEB7b88D97c0bE085f5";

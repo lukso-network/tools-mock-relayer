@@ -8,7 +8,7 @@ import { Request } from "express";
 
 import { SignatureAuth } from "./quota.interfaces";
 import { LSP7DigitalAsset__factory } from "../../../types/ethers-v5";
-import { OPERATOR_UP_ADDRESS } from "../../globals";
+import { OPERATOR_UP_ADDRESS, QUOTA_CONTRACT_ADDRESS } from "../../globals";
 import { getProvider } from "../../libs/ethers.service";
 import { getSigner } from "../../libs/signer.service";
 
@@ -17,9 +17,7 @@ export enum QuotaMode {
   TokenQuotaTransactionsCount = "TokenQuotaTransactionsCount",
 }
 
-export const quotaTokenAddress: string =
-  process.env.QUOTA_TOKEN_ADDRESS ||
-  "0x2454A56269b1a978655D1aeCD24d6cc7c59aD5b6";
+export const quotaTokenAddress: string = QUOTA_CONTRACT_ADDRESS;
 
 export async function handleQuotas(
   req: Request,
@@ -35,14 +33,17 @@ export async function handleQuotas(
       );
     }
     const quota = await getTokenTransactionsCountQuota(signatureAuthParameters);
+
+    console.log(`QUOTA TO NUMBER: ${quota.toNumber()}`);
     const tokensByOperator = await getAuthorizedAmountFor(
       signatureAuthParameters
     );
+    console.log(`Tokens By Operator TO NUMBER: ${tokensByOperator.toNumber()}`);
 
     //  Ideally UP plugin does transactionCount model, but at this moment quotas are multiplied
     return {
       //  total quota represents all the LSP7 tokens that UP has
-      quota: quota.toNumber() * 100000000000,
+      quota: (quota.toNumber() + 1) * 100000000000,
       unit: "transactionCount",
       //  total quota represents all the LSP7 that was authorized in this backend
       totalQuota: tokensByOperator.toNumber(),
@@ -82,13 +83,14 @@ export async function getAuthorizedAmountFor(
     provider
   );
 
-  console.log(
-    "middleware:AuthorizedQuota",
-      (await lsp7Token.authorizedAmountFor(
+  try {
+    const authorizedQuota = await lsp7Token.authorizedAmountFor(
       getSigner().address,
       signatureAuth.address
-    )).toNumber()
-  );
+    );
+
+    console.log(authorizedQuota)
+  } catch (error) {}
 
   return BigNumber.from(1);
 
