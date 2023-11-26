@@ -56,7 +56,7 @@ IS_VALID_SIGNATURE_MAGIC_VALUE = 0xffffffff
 ```.shell
 QUOTA_MODE=TokenQuotaTransactionsCount
 QUOTA_TOKEN_ADDRESS = LSP7 TOKEN ADDRESS
-OPERATOR_ADDRESS=UP THAT HAS ENOUGH PERMISSION SET TO SIGNER/BACKEND EOA
+OPERATOR_UP_ADDRESS=UP THAT HAS ENOUGH PERMISSION SET TO SIGNER/BACKEND EOA
 ```
 Behaviour:
 - to get Quota as a signer you perform normal operation, but since UP Extension does not support 

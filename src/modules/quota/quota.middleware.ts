@@ -22,10 +22,11 @@ export async function quotaMiddleware(
     return;
   }
   const signatureAuth = req.body as SignatureAuth;
+  let quotaLeft = BigNumber.from(0);
 
-  const quotaLeft = await getTokenTransactionsCountQuota(
-    req.body as SignatureAuth
-  );
+  try {
+    quotaLeft = await getTokenTransactionsCountQuota(req.body as SignatureAuth);
+  } catch (err) {}
 
   if (quotaLeft.lt(BigNumber.from(1))) {
     // If there is no enough quota UPGRADE it

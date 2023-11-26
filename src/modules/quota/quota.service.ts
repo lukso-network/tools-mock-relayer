@@ -10,7 +10,7 @@ import { SignatureAuth } from "./quota.interfaces";
 import { LSP7DigitalAsset__factory } from "../../../types/ethers-v5";
 import { OPERATOR_UP_ADDRESS, QUOTA_CONTRACT_ADDRESS } from "../../globals";
 import { getProvider } from "../../libs/ethers.service";
-import { getSigner } from "../../libs/signer.service";
+import { sign } from "crypto";
 
 export enum QuotaMode {
   DummyQuota = "DummyQuota",
@@ -23,35 +23,36 @@ export async function handleQuotas(
   req: Request,
   quotaType: QuotaMode = QuotaMode.DummyQuota
 ) {
-  if (QuotaMode.TokenQuotaTransactionsCount === quotaType) {
-    const signatureAuthParameters = req.body as SignatureAuth;
-    const { address, timestamp, signature } =
-      signatureAuthParameters as SignatureAuth;
-    if (!address || !timestamp || !signature) {
-      throw new Error(
-        "handleQuotas function should be used only if signature is present in the request"
-      );
-    }
-    const quota = await getTokenTransactionsCountQuota(signatureAuthParameters);
-
-    console.log(`QUOTA TO NUMBER: ${quota.toNumber()}`);
-    const tokensByOperator = await getAuthorizedAmountFor(
-      signatureAuthParameters
-    );
-    console.log(`Tokens By Operator TO NUMBER: ${tokensByOperator.toNumber()}`);
-
-    //  Ideally UP plugin does transactionCount model, but at this moment quotas are multiplied
-    return {
-      //  total quota represents all the LSP7 tokens that UP has
-      quota: (quota.toNumber() + 1) * 100000000000,
-      unit: "transactionCount",
-      //  total quota represents all the LSP7 that was authorized in this backend
-      totalQuota: tokensByOperator.toNumber(),
-      resetDate: getDummyResetDate(new Date()),
-    };
+  if (QuotaMode.TokenQuotaTransactionsCount !== quotaType) {
+    return handleDummyQuota();
   }
 
-  return handleDummyQuota();
+  const signatureAuthParameters = req.body as SignatureAuth;
+  const { address, timestamp, signature } =
+    signatureAuthParameters as SignatureAuth;
+  if (!address || !timestamp || !signature) {
+    throw new Error(
+      "handleQuotas function should be used only if signature is present in the request"
+    );
+  }
+  const quota = await getTokenTransactionsCountQuota(signatureAuthParameters);
+
+  console.log(`QUOTA TO NUMBER: ${quota.toNumber()}`);
+
+  let tokensByOperator = BigNumber.from(0);
+
+  //  This operation shall be assumed safe
+  tokensByOperator = await getAuthorizedAmountFor(signatureAuthParameters);
+
+  //  Ideally UP plugin does transactionCount model, but at this moment quotas are multiplied
+  return {
+    //  total quota represents all the LSP7 tokens that UP has
+    quota: (quota.toNumber() + 1) * 100000000000,
+    unit: "transactionCount",
+    //  total quota represents all the LSP7 that was authorized in this backend
+    totalQuota: tokensByOperator,
+    resetDate: getDummyResetDate(new Date()),
+  };
 }
 
 function handleDummyQuota() {
@@ -82,17 +83,6 @@ export async function getAuthorizedAmountFor(
     quotaTokenAddress,
     provider
   );
-
-  try {
-    const authorizedQuota = await lsp7Token.authorizedAmountFor(
-      getSigner().address,
-      signatureAuth.address
-    );
-
-    console.log(authorizedQuota)
-  } catch (error) {}
-
-  return BigNumber.from(1);
 
   return await lsp7Token.authorizedAmountFor(
     OPERATOR_UP_ADDRESS,

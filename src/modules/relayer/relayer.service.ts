@@ -1,4 +1,4 @@
-import { BigNumber, ethers } from "ethers";
+import {BigNumber, BigNumberish, ethers} from "ethers";
 
 import { Transaction } from "./relayer.interfaces";
 import {
@@ -61,8 +61,11 @@ export async function handleExecute(address: string, transaction: Transaction) {
   await handleExecutionChargeback(
     address,
     ethers.utils.keccak256(signature.signedTransaction),
+    gasLimit,
     true
   );
+
+  return;
 
   const transactionResponse = await provider.sendTransaction(
     signature.signedTransaction
@@ -72,7 +75,8 @@ export async function handleExecute(address: string, transaction: Transaction) {
     await waitForTransaction(transactionResponse);
     await handleExecutionChargeback(
       address,
-      ethers.utils.keccak256(signature.signedTransaction)
+      ethers.utils.keccak256(signature.signedTransaction),
+      gasLimit
     );
   };
 
@@ -87,39 +91,79 @@ export async function handleExecute(address: string, transaction: Transaction) {
 export async function handleExecutionChargeback(
   address: string,
   transactionHash: string,
+  gasLimit: BigNumberish,
   pessimistic?: boolean
 ) {
   if (QuotaMode.TokenQuotaTransactionsCount !== quotaMode) {
     return;
   }
 
-  const signer = getSigner();
+  const provider = getProvider();
+  const universalProfile = UniversalProfile__factory.connect(
+    address,
+    getProvider()
+  );
+  const keyManagerAddress = await universalProfile.owner();
+  const keyManager = LSP6KeyManager__factory.connect(
+    keyManagerAddress,
+    provider
+  );
+
   const lsp7Token = LSP7DigitalAsset__factory.connect(
     quotaTokenAddress,
-    signer
+    getProvider()
   );
 
   logger.info(
-    `Starting chargeback, tx: ${transactionHash}, signer: ${signer.address}, address: ${address}`
+    `Starting chargeback, tx: ${transactionHash}, signer: ${keyManager.address}, address: ${address}, pessimistic: ${pessimistic}`
   );
+
+  const operators = await lsp7Token.getOperatorsOf(address);
+
+  let found = false;
+
+  for (const operator of operators) {
+    console.log("challenge", operator.toLowerCase(), OPERATOR_UP_ADDRESS.toLowerCase());
+
+    if (operator.toLowerCase() === OPERATOR_UP_ADDRESS.toLowerCase()) {
+      found = true;
+    }
+  }
+
+  if (!found) {
+    throw new Error()
+  }
+
 
   // This parameter estimates gas to safely check if transaction execution won't fail
   if (pessimistic) {
-    await lsp7Token.estimateGas.transfer(
-      address,
-      OPERATOR_UP_ADDRESS,
-      BigNumber.from(1),
-      false,
-      transactionHash
-    );
+    try {
+      await lsp7Token.estimateGas.transfer(
+        address,
+        OPERATOR_UP_ADDRESS,
+        1,
+        false,
+        transactionHash,
+        { from: OPERATOR_UP_ADDRESS }
+      );
+    } catch (error) {
+      console.log(error);
+      throw new Error("could not estimate transfer of the token");
+    }
+
+    logger.info("Estimate correct");
 
     return;
   }
 
+  return;
+
+  logger.info("✉️ Chargeback initiated. Godspeed!");
+
   const transferTx = await lsp7Token.transfer(
     address,
     OPERATOR_UP_ADDRESS,
-    BigNumber.from(1),
+    1,
     false,
     transactionHash
   );
@@ -127,6 +171,6 @@ export async function handleExecutionChargeback(
   await waitForTransaction(transferTx);
 
   logger.info(
-    `✉️ Dispatched chargeback transaction: ${transactionHash}, signer: ${signer.address}, transferTx: ${transferTx.hash}, address: ${address}`
+    `✉️ Dispatched chargeback transaction: ${transactionHash}, signer: ${keyManager.address}, transferTx: ${transferTx.hash}, address: ${address}`
   );
 }

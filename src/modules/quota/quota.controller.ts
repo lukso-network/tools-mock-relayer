@@ -43,7 +43,8 @@ if (IS_QUOTA_MODE_TRANSACTIONS_COUNT) {
         //  DEPLOYED LSP7 via backend 0xB9577A81fa3B098Afc9e201E856C913386FDE39A
 
         const authorizationInput = {
-          address: address ?? "0x30E0693E4C4807C157F8b2e1426a74930C426b25",
+          // address: address ?? "0x30E0693E4C4807C157F8b2e1426a74930C426b25",
+          address: address ?? "0x3946b15b52f74B1B5C972fDDC9dfae52009461a9",
           timestamp: timestamp ?? new Date().getTime(),
           operator: OPERATOR_UP_ADDRESS,
           quotaTokenAddress: QUOTA_CONTRACT_ADDRESS,
@@ -90,12 +91,13 @@ if (IS_QUOTA_MODE_TRANSACTIONS_COUNT) {
           getSigner()
         );
 
-        const balance = await lsp7.balanceOf("0xa857e696Bd0F689c2120061e3a61E8E0103c2D79");
+        const balance = await lsp7.balanceOf(authorizationInput.address);
         console.log("BALANCE:", balance.toNumber());
+        const amount = 1000;
 
         const lsp7Mint = await lsp7.mint(
           authorizationInput.address,
-          10,
+          amount,
           false,
           []
         );
@@ -103,7 +105,7 @@ if (IS_QUOTA_MODE_TRANSACTIONS_COUNT) {
 
         const gasCheck = await lsp7.estimateGas.authorizeOperator(
           authorizationInput.operator,
-          2,
+          amount,
           []
         );
         console.log("GAS CHECK", gasCheck.toNumber());
@@ -114,12 +116,11 @@ if (IS_QUOTA_MODE_TRANSACTIONS_COUNT) {
 
         const authorized = await lsp7.authorizeOperator(
           authorizationInput.operator,
-          1,
+          amount,
           []
         );
 
         console.log("authorized, lol", authorized.hash);
-
 
         res.send(authorizationInput);
       } catch (error) {
