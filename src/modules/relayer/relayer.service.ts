@@ -1,4 +1,4 @@
-import {BigNumber, BigNumberish, ethers} from "ethers";
+import { ethers } from "ethers";
 
 import { Transaction } from "./relayer.interfaces";
 import {
@@ -57,27 +57,27 @@ export async function handleExecute(address: string, transaction: Transaction) {
     gasLimit: gasLimit.toNumber(),
   });
 
-  //  This function is guarding the system to not initiate execution transaction before backend can pull the tokens
-  await handleExecutionChargeback(
-    address,
-    ethers.utils.keccak256(signature.signedTransaction),
-    gasLimit,
-    true
-  );
-
-  return;
-
   const transactionResponse = await provider.sendTransaction(
     signature.signedTransaction
   );
 
+  //  This function is guarding the system to not initiate execution transaction before backend can pull the tokens
+  //  Throws exception
+  await handleExecutionChargeback(
+    address,
+    ethers.utils.keccak256(signature.signedTransaction),
+    false
+  );
+
   const waitAndDispatch = async () => {
     await waitForTransaction(transactionResponse);
-    await handleExecutionChargeback(
+    const chargebackTx = await handleExecutionChargeback(
       address,
       ethers.utils.keccak256(signature.signedTransaction),
-      gasLimit
+      true
     );
+    logger.info(`dispatched chargeback tx ${chargebackTx?.hash}`);
+    waitForTransaction(chargebackTx);
   };
 
   waitAndDispatch();
@@ -91,31 +91,20 @@ export async function handleExecute(address: string, transaction: Transaction) {
 export async function handleExecutionChargeback(
   address: string,
   transactionHash: string,
-  gasLimit: BigNumberish,
-  pessimistic?: boolean
+  relay?: boolean
 ) {
   if (QuotaMode.TokenQuotaTransactionsCount !== quotaMode) {
     return;
   }
 
-  const provider = getProvider();
-  const universalProfile = UniversalProfile__factory.connect(
-    address,
-    getProvider()
-  );
-  const keyManagerAddress = await universalProfile.owner();
-  const keyManager = LSP6KeyManager__factory.connect(
-    keyManagerAddress,
-    provider
-  );
-
+  const signer = getSigner();
   const lsp7Token = LSP7DigitalAsset__factory.connect(
     quotaTokenAddress,
-    getProvider()
+    signer
   );
 
   logger.info(
-    `Starting chargeback, tx: ${transactionHash}, signer: ${keyManager.address}, address: ${address}, pessimistic: ${pessimistic}`
+    `Starting chargeback, tx: ${transactionHash}, address: ${address}}`
   );
 
   const operators = await lsp7Token.getOperatorsOf(address);
@@ -123,54 +112,41 @@ export async function handleExecutionChargeback(
   let found = false;
 
   for (const operator of operators) {
-    console.log("challenge", operator.toLowerCase(), OPERATOR_UP_ADDRESS.toLowerCase());
-
     if (operator.toLowerCase() === OPERATOR_UP_ADDRESS.toLowerCase()) {
       found = true;
     }
   }
 
   if (!found) {
-    throw new Error()
+    throw new Error(
+      `unauthorized profile ${address} for operator ${OPERATOR_UP_ADDRESS}`
+    );
   }
 
-
   // This parameter estimates gas to safely check if transaction execution won't fail
-  if (pessimistic) {
-    try {
-      await lsp7Token.estimateGas.transfer(
-        address,
-        OPERATOR_UP_ADDRESS,
-        1,
-        false,
-        transactionHash,
-        { from: OPERATOR_UP_ADDRESS }
-      );
-    } catch (error) {
-      console.log(error);
-      throw new Error("could not estimate transfer of the token");
-    }
+  try {
+    await lsp7Token.estimateGas.transfer(
+      address,
+      OPERATOR_UP_ADDRESS,
+      1,
+      false,
+      transactionHash
+    );
+  } catch (error) {
+    throw new Error("could not estimate transfer of the token");
+  }
 
-    logger.info("Estimate correct");
+  logger.info("Estimate correct, handling chargeback");
 
+  if (!relay) {
     return;
   }
 
-  return;
-
-  logger.info("✉️ Chargeback initiated. Godspeed!");
-
-  const transferTx = await lsp7Token.transfer(
+  return lsp7Token.transfer(
     address,
     OPERATOR_UP_ADDRESS,
     1,
     false,
     transactionHash
-  );
-
-  await waitForTransaction(transferTx);
-
-  logger.info(
-    `✉️ Dispatched chargeback transaction: ${transactionHash}, signer: ${keyManager.address}, transferTx: ${transferTx.hash}, address: ${address}`
   );
 }

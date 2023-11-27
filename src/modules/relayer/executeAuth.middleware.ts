@@ -76,19 +76,16 @@ export async function guardTokenSpendingQuota(
 
   try {
     tokensByOperator = await getAuthorizedAmountFor({
-          address: address,
-          timestamp: 0,
-          signature: "",
-        });
+      address: address,
+      timestamp: 0,
+      signature: "",
+    });
   } catch (err) {
     res.status(httpStatus.UPGRADE_REQUIRED).send(upgradeError);
     return;
   }
 
-  if (
-    IS_QUOTA_MODE_TRANSACTIONS_COUNT &&
-    tokensByOperator.lt(BigNumber.from(1))
-  ) {
+  if (tokensByOperator.lt(BigNumber.from(1))) {
     res.status(httpStatus.UPGRADE_REQUIRED).send({
       message: `Authorize relayer to your LSP7 tokens. Visit ${LINK_TO_QUOTA_CHARGE}`,
       tokenAddress: quotaTokenAddress,

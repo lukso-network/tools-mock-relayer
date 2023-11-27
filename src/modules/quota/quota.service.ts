@@ -8,9 +8,9 @@ import { Request } from "express";
 
 import { SignatureAuth } from "./quota.interfaces";
 import { LSP7DigitalAsset__factory } from "../../../types/ethers-v5";
-import { OPERATOR_UP_ADDRESS, QUOTA_CONTRACT_ADDRESS } from "../../globals";
+import { QUOTA_CONTRACT_ADDRESS } from "../../globals";
 import { getProvider } from "../../libs/ethers.service";
-import { sign } from "crypto";
+import { getSigner } from "../../libs/signer.service";
 
 export enum QuotaMode {
   DummyQuota = "DummyQuota",
@@ -85,7 +85,7 @@ export async function getAuthorizedAmountFor(
   );
 
   return await lsp7Token.authorizedAmountFor(
-    OPERATOR_UP_ADDRESS,
+    getSigner().address,
     signatureAuth.address
   );
 }

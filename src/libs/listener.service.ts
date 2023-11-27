@@ -7,8 +7,26 @@ let acceptNextTransaction = true;
 let currentTransaction: string;
 
 export async function waitForTransaction(
-  transaction: ethers.providers.TransactionResponse
+  providerTransaction?: ethers.providers.TransactionResponse,
+  contractTransaction?: ethers.ContractTransaction
 ) {
+  if (
+    "undefined" === typeof providerTransaction &&
+    "undefined" === typeof contractTransaction
+  ) {
+    throw new Error("please provide transaction to wait for");
+  }
+
+  if (
+    "undefined" !== typeof providerTransaction &&
+    "undefined" !== typeof contractTransaction
+  ) {
+    throw new Error("cannot handle 2 transactions at once");
+  }
+  const transaction = providerTransaction ?? contractTransaction;
+  if ("undefined" === typeof transaction) {
+    throw new Error("internal error with dispatch of the transaction");
+  }
   acceptNextTransaction = false;
   currentTransaction = transaction.hash;
 
