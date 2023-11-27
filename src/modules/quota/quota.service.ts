@@ -37,17 +37,24 @@ export async function handleQuotas(
   }
   const quota = await getTokenTransactionsCountQuota(signatureAuthParameters);
 
-  console.log(`QUOTA TO NUMBER: ${quota.toNumber()}`);
-
-  let tokensByOperator = BigNumber.from(0);
-
   //  This operation shall be assumed safe
-  tokensByOperator = await getAuthorizedAmountFor(signatureAuthParameters);
+  const tokensByOperator = await getAuthorizedAmountFor(
+    signatureAuthParameters
+  );
+
+  let safeQuotaVal;
+
+  //  This part shall be removed when UP Plugin supports TransactionCount model.
+  try {
+    safeQuotaVal = (quota.toNumber() + 1) * 100000000000;
+  } catch (err) {
+    safeQuotaVal = quota;
+  }
 
   //  Ideally UP plugin does transactionCount model, but at this moment quotas are multiplied
   return {
     //  total quota represents all the LSP7 tokens that UP has
-    quota: (quota.toNumber() + 1) * 100000000000,
+    quota: safeQuotaVal,
     unit: "transactionCount",
     //  total quota represents all the LSP7 that was authorized in this backend
     totalQuota: tokensByOperator,

@@ -14,7 +14,6 @@ async function startServer() {
   app.use("/", relayerController);
   app.use("/quota", quotaController);
 
-  //  Check if the operator has enough permissions set on controller key
   const server = http.createServer(app).listen({ host, port }, () => {
     const addressInfo = server.address() as AddressInfo;
     logger.info(
