@@ -115,9 +115,11 @@ For all available `QUOTA_MODES` see [THIS FILE](src/modules/quota/quota.service.
 #### Networks
 If you want to deploy relayer to LUKSO mainnet you need to change
 ```.shell
+CHAIN_ID=42
 IS_VALID_SIGNATURE_MAGIC_VALUE = 0xffffffff
+SIGNER_PRIVATE_KEY=
 ```
-
+Where SIGNER_PRIVATE_KEY is key without `0x` exported from 4.eg Metamask and pasted `as is`
 ### Quota mode reliant variables
 #### QUOTA_MODE=TokenQuotaTransactionsCount
 .env related variables
