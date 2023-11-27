@@ -38,44 +38,6 @@ This can be turned on or off by setting `ENABLE_TRANSACTION_GATE` to `true` or `
 
 ## LSP15 Transaction Relayer Service API Specification
 
-### QuotaMode
-This project allows to handle multiple quota modes based on an ENV parameter `QUOTA_MODE`
-If you do not provide specific `QUOTA_MODE` default value will be `DummyQuota`.
-For all available `QUOTA_MODES` see [THIS FILE](src/modules/quota/quota.service.ts)
-`QUOTA_TOKEN_ADDRESS` Should be an address to the LSP7 token, that will be representing the usage. 
-
-#### Networks
-If you want to deploy relayer to LUKSO mainnet you need to change
-```.shell
-IS_VALID_SIGNATURE_MAGIC_VALUE = 0xffffffff
-```
-
-### Quota mode reliant variables
-#### QUOTA_MODE=TokenQuotaTransactionsCount
-.env variables
-```.shell
-QUOTA_MODE=TokenQuotaTransactionsCount
-QUOTA_TOKEN_ADDRESS = LSP7 TOKEN ADDRESS
-OPERATOR_UP_ADDRESS=UP THAT HAS ENOUGH PERMISSION SET TO SIGNER/BACKEND EOA
-```
-Behaviour:
-- to get Quota as a signer you perform normal operation, but since UP Extension does not support 
- `transactionCount` as an `unit` values are heavily multiplied. In `totalQuota` response you can see how many LSP7 tokens
-  approved the operator. In `quota` you will see all the tokens execution UP has.
-- backend on execute will optimistically assure that if `quota` > 0 UP can consume the /Execute endpoint, although   
-  if there is not enough LSP7 tokens that were approved to current operator backend will return `httpStatus.UPGRADE_REQUIRED`
-
-LSP 7 Token distribution:
-To gain access to the ecosystem there must be a distribution of LSP7 tokens, which is called `charger`.
-To use LSP 7 user must have the UP. User can create new profiles via relayer only if the user has at least one.
-There is a **PROFILE PARADOX** which you must solve by custom business logic.
-Once User has the UP, claiming tokens will be handled via `charger station` implementations.
-There is absolutely more to discover via this approach.
-
-For the LUKSO mainnet you can use UN
-
-
-
 #### POST `/execute`
 
 Executes a signed transaction on behalf of a Universal Profile using `executeRelayCall()`.
@@ -142,3 +104,45 @@ Returns the available quota left for a registered Universal Profile.
 - `unit` could be `gas`, `lyx` or `transactionCount` depending on the business model
 - `totalQuota` reflects total limit. i.e. available + used quota since reset
 - `resetDate` gives date that available quota will reset, e.g. a monthly allowance
+
+
+### QuotaMode
+This project allows to handle multiple quota modes based on an ENV parameter `QUOTA_MODE`
+If you do not provide specific `QUOTA_MODE` default value will be `DummyQuota`.
+For all available `QUOTA_MODES` see [THIS FILE](src/modules/quota/quota.service.ts)
+`QUOTA_TOKEN_ADDRESS` Should be an address to the LSP7 token, that will be representing the usage.
+
+#### Networks
+If you want to deploy relayer to LUKSO mainnet you need to change
+```.shell
+IS_VALID_SIGNATURE_MAGIC_VALUE = 0xffffffff
+```
+
+### Quota mode reliant variables
+#### QUOTA_MODE=TokenQuotaTransactionsCount
+.env related variables
+```.shell
+QUOTA_MODE=TokenQuotaTransactionsCount
+QUOTA_TOKEN_ADDRESS = LSP7 TOKEN ADDRESS
+OPERATOR_UP_ADDRESS=FEE RECIPIENT. BACKEND WILL SEND LSP7 TOKENS TO THIS UP
+```
+Behaviour:
+- to get Quota as a signer you perform normal operation, but since UP Extension does not support
+  `transactionCount` as an `unit` values are heavily multiplied. In `totalQuota` response you can see how many LSP7 tokens
+  approved the operator. In `quota` you will see all the tokens execution UP has.
+- backend on execute will optimistically assure that if `quota` > 0 UP can consume the /Execute endpoint, although   
+  if there is not enough LSP7 tokens that were approved to current operator backend will return `httpStatus.UPGRADE_REQUIRED`
+
+LSP 7 Token distribution:
+To gain access to the ecosystem there must be a distribution of LSP7 tokens, which is called `charger`.
+To use LSP 7 user must have the UP. User can create new profiles via relayer only if the user has at least one.
+There is a **PROFILE PARADOX** which you must solve by custom business logic.
+Once User has the UP, claiming tokens will be handled via `charger station` implementations.
+There is absolutely way more to discover via this approach.
+
+For the LUKSO mainnet you can use UN1.IO Token, contact me for the token distribution.
+If you know how to set up everything by your own feel free to use custom token.
+
+
+#### How to authorize operator?:
+See: [authorizeOperator](https://github.com/lukso-network/lsp-smart-contracts/blob/develop/docs/contracts/LSP7DigitalAsset/extensions/LSP7Burnable.md#authorizeoperator)
