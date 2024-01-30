@@ -1,4 +1,5 @@
 import { EIP191Signer } from "@lukso/eip191-signer.js";
+import { LSP25_VERSION } from "@lukso/lsp-smart-contracts";
 import { ethers } from "ethers";
 import { getAddress } from "ethers/lib/utils";
 import { NextFunction, Request, Response } from "express";
@@ -67,11 +68,11 @@ export async function validateExecuteSignature(
   const message = ethers.utils.solidityPack(
     ["uint256", "uint256", "uint256", "uint256", "uint256", "bytes"],
     [
-      6,
+      LSP25_VERSION,
       CHAIN_ID,
       transaction.nonce,
       transaction.validityTimestamps || 0,
-      0,
+      0, // the amount of native tokens to transfer (in Wei)
       transaction.abi,
     ]
   );
