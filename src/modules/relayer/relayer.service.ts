@@ -19,8 +19,6 @@ export async function handleExecute(address: string, transaction: Transaction) {
 
   transactionGate();
 
-  const { signature, nonce, abi, validityTimestamps } = transaction;
-
   const provider = getProvider();
 
   const universalProfile = UniversalProfile__factory.connect(address, provider);
@@ -33,25 +31,23 @@ export async function handleExecute(address: string, transaction: Transaction) {
   let gasLimit: BigNumber;
   try {
     gasLimit = await keyManager.estimateGas.executeRelayCall(
-      signature,
-      nonce,
-      validityTimestamps || 0,
-      abi
+      transaction.signature,
+      transaction.nonce,
+      transaction.validityTimestamps || 0,
+      transaction.abi
     );
   } catch (error) {
-    gasLimit = BigNumber.from(3000000);
-    logger.info(
-      "⏭️ Unable to estimate gas. Setting default value to gas Limit"
-    );
+    logger.info("⏭️ Unable to estimate gas. Transaction will revert.");
+    throw error;
   }
 
   const lsp6Interface = LSP6KeyManagerInit__factory.createInterface();
 
   const transactionData = lsp6Interface.encodeFunctionData("executeRelayCall", [
-    signature,
-    nonce,
-    validityTimestamps,
-    abi,
+    transaction.signature,
+    transaction.nonce,
+    transaction.validityTimestamps,
+    transaction.abi,
   ]);
 
   logger.info(`Signing executeRelayCall transaction`);
@@ -59,13 +55,13 @@ export async function handleExecute(address: string, transaction: Transaction) {
   const signedTransaction = await signTransaction({
     to: keyManagerAddress,
     transactionData,
-    gasLimit,
+    gasLimit: gasLimit.toNumber(),
   });
 
   let transactionResponse: ethers.providers.TransactionResponse;
   try {
     transactionResponse = await provider.sendTransaction(
-      signedTransaction.signerSignature
+      signedTransaction.signature
     );
   } catch (error) {
     logger.error("❌ Error sending transaction to the blockchain.");
@@ -74,9 +70,7 @@ export async function handleExecute(address: string, transaction: Transaction) {
 
   waitForTransaction(transactionResponse);
 
-  const transactionHash = ethers.utils.keccak256(
-    signedTransaction.signerSignature
-  );
+  const transactionHash = ethers.utils.keccak256(signedTransaction.signature);
 
   logger.info(
     `✉️ Dispatched transaction: https://explorer.execution.testnet.lukso.network/tx/${transactionHash}`

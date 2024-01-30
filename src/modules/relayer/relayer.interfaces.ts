@@ -1,8 +1,8 @@
 export interface Transaction {
   abi: string;
   signature: string;
-  nonce: string;
-  validityTimestamps: string | number;
+  nonce: number;
+  validityTimestamps: string | number | null;
 }
 
 export interface ExecutePayload {

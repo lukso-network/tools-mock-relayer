@@ -1,4 +1,4 @@
-import { BigNumber, ethers } from "ethers";
+import { ethers } from "ethers";
 
 import { getProvider } from "./ethers.service";
 import { logger } from "./logger.service";
@@ -7,11 +7,11 @@ import { CHAIN_ID, SIGNER_PRIVATE_KEY } from "../globals";
 interface SigningRequest {
   transactionData: string;
   to: string;
-  gasLimit: BigNumber;
+  gasLimit: number;
 }
 
 interface SigningResponse {
-  signerSignature: string;
+  signature: string;
   signerAddress: string;
   nonce: number;
 }
@@ -40,26 +40,7 @@ export async function signTransaction(
 
   if (!provider) throw new Error("RPC provider not specified");
 
-  let signerBalanceInWei: ethers.BigNumber;
-  try {
-    signerBalanceInWei = await signer.getBalance();
-  } catch (error) {
-    logger.error("❌ Unable to get signing key balance.");
-    throw error;
-  }
-
-  logger.info(
-    `💰 Signer address ${
-      signer?.address
-    } has a balance of ${ethers.utils.formatEther(signerBalanceInWei)} LYX`
-  );
-
   const { to, gasLimit, transactionData } = signingRequest;
-
-  if (Number(gasLimit) > Number(signerBalanceInWei)) {
-    const errorMessage = `😢 Insufficiant balance. Gas Limit : ${gasLimit} SignerKeyBalance : ${signerBalanceInWei}`;
-    throw new Error(errorMessage);
-  }
 
   const signerAddress = signer.address;
   logger.info(`🖋️ Signing transaction with signing key ${signerAddress}`);
@@ -93,16 +74,16 @@ export async function signTransaction(
     throw error;
   }
 
-  let signerSignature: string;
+  let signature: string;
   try {
-    signerSignature = await signer.signTransaction(populatedTransaction);
+    signature = await signer.signTransaction(populatedTransaction);
   } catch (error) {
     logger.error(`❌ Error signing transaction ${populatedTransaction}`);
     throw error;
   }
 
   return {
-    signerSignature,
+    signature,
     signerAddress: signerAddress,
     nonce: signerNonce,
   };
