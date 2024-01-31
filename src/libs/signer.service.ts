@@ -2,7 +2,7 @@ import { ethers } from "ethers";
 
 import { getProvider } from "./ethers.service";
 import { logger } from "./logger.service";
-import { CHAIN_ID, SIGNER_PRIVATE_KEY } from "../globals";
+import { SIGNER_PRIVATE_KEY } from "../globals";
 
 interface SigningRequest {
   transactionData: string;
@@ -53,6 +53,8 @@ export async function signTransaction(
     throw error;
   }
 
+  const chainId = (await provider.getNetwork()).chainId;
+
   const transactionParameters = {
     to,
     from: signerAddress,
@@ -60,7 +62,7 @@ export async function signTransaction(
     gasLimit,
     value: 0,
     type: 2,
-    chainId: Number.parseInt(CHAIN_ID),
+    chainId,
     data: transactionData,
   };
 
