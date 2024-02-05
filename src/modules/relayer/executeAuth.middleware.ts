@@ -7,7 +7,7 @@ import httpStatus from "http-status";
 
 import { ExecutePayload } from "./relayer.interfaces";
 import { UniversalProfile__factory } from "../../../types/ethers-v5";
-import { CHAIN_ID, IS_VALID_SIGNATURE_MAGIC_VALUE } from "../../globals";
+import { IS_VALID_SIGNATURE_MAGIC_VALUE } from "../../globals";
 import { getProvider } from "../../libs/ethers.service";
 
 export async function validateRequestPayload(executeRequest: ExecutePayload) {
@@ -65,11 +65,13 @@ export async function validateExecuteSignature(
   const universalProfile = UniversalProfile__factory.connect(address, provider);
   const keyManagerAddress = await universalProfile.owner();
 
+  const chainId = (await provider.getNetwork()).chainId;
+
   const message = ethers.utils.solidityPack(
     ["uint256", "uint256", "uint256", "uint256", "uint256", "bytes"],
     [
       LSP25_VERSION,
-      CHAIN_ID,
+      chainId,
       transaction.nonce,
       transaction.validityTimestamps || 0,
       0, // the amount of native tokens to transfer (in Wei)

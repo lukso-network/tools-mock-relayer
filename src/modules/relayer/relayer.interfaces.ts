@@ -2,7 +2,7 @@ export interface Transaction {
   abi: string;
   signature: string;
   nonce: number;
-  validityTimestamps?: string;
+  validityTimestamps: string | number | null;
 }
 
 export interface ExecutePayload {

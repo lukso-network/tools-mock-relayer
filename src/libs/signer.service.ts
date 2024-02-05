@@ -1,17 +1,24 @@
 import { ethers } from "ethers";
 
 import { getProvider } from "./ethers.service";
+import { logger } from "./logger.service";
 import { SIGNER_PRIVATE_KEY } from "../globals";
 
-export interface SigningRequest {
+interface SigningRequest {
   transactionData: string;
   to: string;
-  gasLimit: string | number;
+  gasLimit: number;
+}
+
+interface SigningResponse {
+  signature: string;
+  signerAddress: string;
+  nonce: number;
 }
 
 let signer: ethers.Wallet;
 
-export function getSigner() {
+function getSigner() {
   const provider = getProvider();
 
   if (!SIGNER_PRIVATE_KEY) {
@@ -25,7 +32,9 @@ export function getSigner() {
   return signer;
 }
 
-export async function signTransaction(signingRequest: SigningRequest) {
+export async function signTransaction(
+  signingRequest: SigningRequest
+): Promise<SigningResponse> {
   const signer = getSigner();
   const provider = signer.provider;
 
@@ -34,25 +43,49 @@ export async function signTransaction(signingRequest: SigningRequest) {
   const { to, gasLimit, transactionData } = signingRequest;
 
   const signerAddress = signer.address;
+  logger.info(`🖋️ Signing transaction with signing key ${signerAddress}`);
 
-  const signerNonce = await provider.getTransactionCount(signerAddress);
+  let signerNonce: number;
+  try {
+    signerNonce = await provider.getTransactionCount(signerAddress);
+  } catch (error) {
+    logger.error("❌ Unable to get signing key nonce.");
+    throw error;
+  }
 
-  const txRequest = {
+  const chainId = (await provider.getNetwork()).chainId;
+
+  const transactionParameters = {
     to,
     from: signerAddress,
     nonce: signerNonce,
     gasLimit,
-    value: ethers.utils.hexlify(0),
+    value: 0,
     type: 2,
-    chainId: (await provider.getNetwork()).chainId,
+    chainId,
     data: transactionData,
   };
 
-  const populatedTransaction = await signer.populateTransaction(txRequest);
-  const signedTransaction = await signer.signTransaction(populatedTransaction);
+  let populatedTransaction;
+  try {
+    populatedTransaction = await signer.populateTransaction(
+      transactionParameters
+    );
+  } catch (error) {
+    logger.error(`❌ Unable to populate transaction ${transactionParameters}.`);
+    throw error;
+  }
+
+  let signature: string;
+  try {
+    signature = await signer.signTransaction(populatedTransaction);
+  } catch (error) {
+    logger.error(`❌ Error signing transaction ${populatedTransaction}`);
+    throw error;
+  }
 
   return {
-    signedTransaction,
+    signature,
     signerAddress: signerAddress,
     nonce: signerNonce,
   };
